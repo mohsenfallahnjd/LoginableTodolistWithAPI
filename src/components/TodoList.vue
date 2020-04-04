@@ -2,7 +2,7 @@
   <div class="todo-list">
     <v-card class="mx-auto" max-width="700" style="margin-top: -64px;">
       <v-toolbar class="todo-list--toolbar" flat>
-        <v-toolbar-title class=" grey--text">Tasks</v-toolbar-title>
+        <v-toolbar-title class="grey--text">Tasks</v-toolbar-title>
         <v-spacer></v-spacer>
         <v-content class="todo-list__input">
           <v-input class="todo-list__input--input">
@@ -18,10 +18,6 @@
         </v-content>
 
         <v-spacer></v-spacer>
-
-        <v-btn icon>
-          <v-icon>mdi-dots-vertical</v-icon>
-        </v-btn>
       </v-toolbar>
 
       <v-divider></v-divider>
@@ -42,12 +38,65 @@
                     v-else
                     v-html="task.title"
                   ></v-list-item-title>
+
+                  <v-icon @click.stop="task.dialog = true">
+                    mdi-calendar-clock
+                  </v-icon>
+
+                  <v-dialog v-model="task.dialog" max-width="290">
+                    <v-card>
+                      <v-card-title class="headline">Pick a Date</v-card-title>
+
+                      <v-card-text>
+                        <v-menu
+                          v-model="task.datePickerMenu"
+                          :close-on-content-click="false"
+                          max-width="290"
+                        >
+                          <template v-slot:activator="{ on }">
+                            <v-text-field
+                              :value="computedDateFormattedMomentjs(task.id)"
+                              clearable
+                              readonly
+                              v-on="on"
+                              @click:clear="task.date = null"
+                            ></v-text-field>
+                          </template>
+                          <v-date-picker
+                            v-model="task.date"
+                            @change="task.datePickerMenu = false"
+                          ></v-date-picker>
+                        </v-menu>
+                      </v-card-text>
+
+                      <v-card-actions>
+                        <v-spacer></v-spacer>
+
+                        <!-- <v-btn
+                          color="red darken-1"
+                          text
+                          @click="task.dialog = false"
+                        >
+                          Cansel
+                        </v-btn> -->
+
+                        <v-btn
+                          color="green darken-1"
+                          text
+                          @click="task.dialog = false"
+                        >
+                          Save
+                        </v-btn>
+                      </v-card-actions>
+                    </v-card>
+                  </v-dialog>
+
                   <v-icon
                     medium
                     v-if="task.done"
                     color="green"
                     class="doneBtn"
-                    @click="doneItem(task.id)"
+                    @click="task.done = !task.done"
                   >
                     mdi-check
                   </v-icon>
@@ -55,7 +104,7 @@
                     medium
                     class="doneBtn"
                     v-else
-                    @click="doneItem(task.id)"
+                    @click="task.done = !task.done"
                   >
                     mdi-check
                   </v-icon>
@@ -73,11 +122,12 @@
 </template>
 
 <script>
+import moment from "moment";
 export default {
   name: "TodoList",
   data: () => ({
     inputValue: "",
-    tasks: []
+    tasks: [],
   }),
   methods: {
     addingTask() {
@@ -89,24 +139,28 @@ export default {
               : 0,
           title: this.inputValue,
           divider: this.tasks.length > 0 ? true : false,
-          done: false
+          done: false,
+          dialog: false,
+          date: new Date().toISOString().substr(0, 10),
+          datePickerMenu: false,
           // userToken: localStorage.getItem("userToken")
         };
         this.tasks.push(newTask);
         this.inputValue = "";
+        console.log(this.tasks);
       }
     },
-    doneItem(id) {
-      this.tasks.forEach(task => {
-        if (task.id == id) {
-          task.done = !task.done;
-        }
-      });
-    },
     removeItem(id) {
-      this.tasks = this.tasks.filter(task => task.id != id);
-    }
-  }
+      this.tasks = this.tasks.filter((task) => task.id != id);
+    },
+    computedDateFormattedMomentjs(id) {
+      return this.tasks.find((task) => task.id == id).date
+        ? moment(this.tasks.find((task) => task.id == id).date).format(
+            "dddd, MMMM Do YYYY"
+          )
+        : "";
+    },
+  },
 };
 </script>
 
