@@ -98,9 +98,9 @@ export default {
     show: false,
     registerForm: false,
     rules: {
-      required: value => !!value || "Required.",
-      min: v => v.length >= 8 || "Min 8 characters"
-    }
+      required: (value) => !!value || "Required.",
+      min: (v) => v.length >= 8 || "Min 8 characters",
+    },
   }),
   methods: {
     regUser() {
@@ -113,12 +113,17 @@ export default {
 
       axios
         .post("http://todo.guilandev.ir/api/user/auth/register", formData)
-        .then(response => {
-          console.log("regUser Success");
-          localStorage.setItem("userToken", response.data.data.token);
-          this.$router.push({ name: "TodoPage" });
+        .then((response) => {
+          if (response.status === 200) {
+            console.log("regUser Success");
+            localStorage.setItem("userToken", response.data.data.token);
+            localStorage.setItem("Name", response.data.data.name);
+            this.$router.push({ name: "TodoPage" });
+          } else {
+            console.log(response.status);
+          }
         })
-        .catch(e => {
+        .catch((e) => {
           console.log(e, "regUser Fail");
         });
     },
@@ -132,16 +137,23 @@ export default {
 
       axios
         .post("http://todo.guilandev.ir/api/user/auth/login", formData)
-        .then(response => {
-          console.log("loginUser Success");
-          localStorage.setItem("userToken", response.data.data.token);
-          this.$router.push({ name: "TodoPage" });
+        .then((response) => {
+          if (response.status === 200) {
+            console.log(response);
+
+            console.log("loginUser Success");
+            localStorage.setItem("userToken", response.data.data.token);
+            localStorage.setItem("Name", response.data.data.name);
+            this.$router.push({ name: "TodoPage" });
+          } else {
+            console.log(response.status);
+          }
         })
-        .catch(e => {
+        .catch((e) => {
           console.log(e, "loginUser Fail");
         });
-    }
-  }
+    },
+  },
 };
 </script>
 // mohsenfallahnejad@gmail.com // mohsenhastam
@@ -188,7 +200,7 @@ $dividerLine: #BAC8E3
         @media screen and (max-width: 500px)
           padding: 0px
           font-size: 30px
-          font-weight: 500      
+          font-weight: 500
       &--form
         width: 70%
         margin: 20px 0px
@@ -260,7 +272,7 @@ $dividerLine: #BAC8E3
         @media screen and (max-width: 500px)
           padding: 0px
           font-size: 30px
-          font-weight: 500    
+          font-weight: 500
       &--form
         width: 70%
         margin: 20px 0px

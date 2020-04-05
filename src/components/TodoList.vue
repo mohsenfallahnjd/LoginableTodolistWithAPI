@@ -83,7 +83,7 @@
                         <v-btn
                           color="green darken-1"
                           text
-                          @click="task.dialog = false"
+                          @click="task.dialog = false;computedDate(task.id)"
                         >
                           Save
                         </v-btn>
@@ -96,7 +96,7 @@
                     v-if="task.done"
                     color="green"
                     class="doneBtn"
-                    @click="task.done = !task.done"
+                    @click="doneItem(task.id)"
                   >
                     mdi-check
                   </v-icon>
@@ -104,7 +104,7 @@
                     medium
                     class="doneBtn"
                     v-else
-                    @click="task.done = !task.done"
+                    @click="doneItem(task.id)"
                   >
                     mdi-check
                   </v-icon>
@@ -123,42 +123,167 @@
 
 <script>
 import moment from "moment";
+import axios from "axios";
+
 export default {
   name: "TodoList",
   data: () => ({
     inputValue: "",
     tasks: [],
   }),
+  beforeMount() {
+    this.getTasks();
+  },
   methods: {
     addingTask() {
       if (this.inputValue != "") {
         const newTask = {
-          id:
-            this.tasks.length > 0
-              ? this.tasks[this.tasks.length - 1].id + 1
-              : 0,
           title: this.inputValue,
-          divider: this.tasks.length > 0 ? true : false,
           done: false,
-          dialog: false,
           date: new Date().toISOString().substr(0, 10),
-          datePickerMenu: false,
-          // userToken: localStorage.getItem("userToken")
         };
-        this.tasks.push(newTask);
+
+        this.postTask(newTask);
         this.inputValue = "";
-        console.log(this.tasks);
       }
     },
-    removeItem(id) {
-      this.tasks = this.tasks.filter((task) => task.id != id);
+
+    postTask(newTask) {
+      this.postAxios(
+        "http://todo.guilandev.ir/api/user/task/add",
+        {
+          title: newTask.title,
+          date: newTask.date,
+        },
+        "addTask"
+      );
     },
+
+    doneItem(id) {
+      this.postAxios(
+        "http://todo.guilandev.ir/api/user/task/mark-done",
+        {
+          task_id: id,
+          done: !this.tasks.find((task) => task.id == id).done,
+        },
+        "doneTask"
+      );
+    },
+
+    removeItem(id) {
+      this.postAxios(
+        "http://todo.guilandev.ir/api/user/task/delete",
+        {
+          task_id: id,
+        },
+        "removeTask"
+      );
+    },
+
+    computedDate(id) {
+      this.postAxios(
+        "http://todo.guilandev.ir/api/user/task/update",
+        {
+          task_id: id,
+          date: this.tasks.find((task) => task.id == id).date,
+        },
+        "setDate"
+      );
+    },
+
     computedDateFormattedMomentjs(id) {
       return this.tasks.find((task) => task.id == id).date
         ? moment(this.tasks.find((task) => task.id == id).date).format(
             "dddd, MMMM Do YYYY"
           )
         : "";
+    },
+
+    getTasks() {
+      axios
+        .get("http://todo.guilandev.ir/api/user/task/list", {
+          headers: {
+            Authorization: "Bearer " + localStorage.getItem("userToken"),
+          },
+        })
+        .then((response) => {
+          if (response.status === 200) {
+            console.log("getTasks Success");
+            this.reSetTasks(response.data.data.tasks);
+          } else {
+            console.log(response);
+          }
+        })
+        .catch((e) => {
+          if (e.response) {
+            console.log("error res");
+            if (e.response.status === 401) {
+              console.log("token Expired");
+              localStorage.setItem("userToken", "");
+              localStorage.setItem("Name", "");
+              this.$router.replace("/", "/tasks");
+            } else {
+              console.log(e, "getTasks failed");
+            }
+          } else if (e.request) {
+            console.log("error req");
+            console.log(e.request);
+          } else {
+            console.log("Error", e);
+          }
+        });
+    },
+
+    reSetTasks(tasksArray) {
+      this.tasks = [];
+      tasksArray.forEach((task) => {
+        const newTask = {
+          id: task.id,
+          title: task.title,
+          divider: this.tasks.length > 0 ? true : false,
+          done: task.done,
+          dialog: false,
+          date: task.date,
+          datePickerMenu: false,
+        };
+        this.tasks.push(newTask);
+      });
+      console.log(this.tasks);
+    },
+
+    postAxios(url, formData, nameOfPost) {
+      axios
+        .post(url, formData, {
+          headers: {
+            Authorization: "Bearer " + localStorage.getItem("userToken"),
+          },
+        })
+        .then((response) => {
+          if (response.status === 200) {
+            console.log(`${nameOfPost} Success`);
+            this.getTasks();
+          } else {
+            console.log(response);
+          }
+        })
+        .catch((e) => {
+          if (e.response) {
+            console.log("error res");
+            if (e.response.status === 401) {
+              console.log("token Expired");
+              localStorage.setItem("userToken", "");
+              localStorage.setItem("Name", "");
+              this.$router.replace("/", "/tasks");
+            } else {
+              console.log(e, `${nameOfPost} Fail`);
+            }
+          } else if (e.request) {
+            console.log("error req");
+            console.log(e.request);
+          } else {
+            console.log("Error", e);
+          }
+        });
     },
   },
 };
