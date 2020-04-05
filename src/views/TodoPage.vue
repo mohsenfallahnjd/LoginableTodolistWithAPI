@@ -68,7 +68,6 @@ export default {
         @media screen and (max-width:500px)
           font-size: 20px
 
-
     .logout-btn
       margin: 0px 12px
       padding: 0px 48px
@@ -77,7 +76,6 @@ export default {
       span
         @media screen and (max-width:500px)
           display: none
-
     .todo-component
       margin: 0vh 5vw
       @media screen and (max-width:500px)

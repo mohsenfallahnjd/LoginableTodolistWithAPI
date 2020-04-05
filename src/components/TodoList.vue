@@ -39,9 +39,35 @@
                     v-html="task.title"
                   ></v-list-item-title>
 
-                  <v-icon @click.stop="task.dialog = true">
+                  <v-text-field
+                    :value="computedDateFormattedMomentjs(task.id)"
+                    rounded
+                    disabled
+                    class="chip--text text-center"
+                  ></v-text-field>
+
+                  <v-icon class="chip--icon" @click.stop="task.dialog = true">
                     mdi-calendar-clock
                   </v-icon>
+
+                  <v-tooltip class="mobile-date" max-width="400px" top>
+                    <template v-slot:activator="{ on }">
+                      <v-icon
+                        class="mobile-date--icon"
+                        v-on="on"
+                        @click.stop="task.dialog = true"
+                      >
+                        mdi-calendar-clock
+                      </v-icon>
+                    </template>
+                    <v-text-field
+                      :value="computedDateFormattedMomentjs(task.id)"
+                      rounded
+                      disabled
+                      dark
+                      class="mobile-date--text"
+                    ></v-text-field>
+                  </v-tooltip>
 
                   <v-dialog v-model="task.dialog" max-width="290">
                     <v-card>
@@ -83,7 +109,10 @@
                         <v-btn
                           color="green darken-1"
                           text
-                          @click="task.dialog = false;computedDate(task.id)"
+                          @click="
+                            task.dialog = false;
+                            computedDate(task.id);
+                          "
                         >
                           Save
                         </v-btn>
@@ -96,7 +125,10 @@
                     v-if="task.done"
                     color="green"
                     class="doneBtn"
-                    @click="doneItem(task.id)"
+                    @click="
+                      task.done = !task.done;
+                      doneItem(task.id);
+                    "
                   >
                     mdi-check
                   </v-icon>
@@ -104,7 +136,10 @@
                     medium
                     class="doneBtn"
                     v-else
-                    @click="doneItem(task.id)"
+                    @click="
+                      task.done = !task.done;
+                      doneItem(task.id);
+                    "
                   >
                     mdi-check
                   </v-icon>
@@ -164,7 +199,7 @@ export default {
         "http://todo.guilandev.ir/api/user/task/mark-done",
         {
           task_id: id,
-          done: !this.tasks.find((task) => task.id == id).done,
+          done: this.tasks.find((task) => task.id == id).done,
         },
         "doneTask"
       );
@@ -304,7 +339,6 @@ export default {
   .todo-card
     overflow-y: auto
     height: 70vh
-
   .listItem
     padding: 0px
     &__content
@@ -316,6 +350,7 @@ export default {
         justify-content: space-between
         padding: 5px 10px
         box-sizing: border-box
+        height: 24px
         .doneBtn
           margin: 0px 15px
           &:hover
@@ -324,6 +359,28 @@ export default {
         .removeBtn
           &:hover
             color: #f44336
+
+        .chip
+          &--icon
+            @media (max-width:500px)
+              display: none
+          &--text
+            padding: 0px
+            margin: -8px 0px
+            height: 24px
+            font-size: 10px
+            width: 320px
+            @media (max-width:500px)
+              display: none
+        .mobile-date
+          &--text
+            width: 100%
+            padding: 0px
+            font-size: 10px
+          &--icon
+            display: none
+            @media (max-width:500px)
+              display: inline-flex
 .decoration
   text-decoration: line-through
   opacity: 0.5
