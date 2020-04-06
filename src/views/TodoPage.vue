@@ -2,7 +2,6 @@
   <div id="todo-page">
     <v-card class="todo-page" flat>
       <v-toolbar color="primary" dark extended flat>
-        <!-- <v-app-bar-nav-icon></v-app-bar-nav-icon> -->
         <h3 class="todo-page__Name">
           Hello <span>{{ name }}</span>
         </h3>

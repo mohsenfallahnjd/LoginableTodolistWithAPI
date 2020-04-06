@@ -105,8 +105,6 @@ export default {
   methods: {
     regUser() {
       const formData = new FormData();
-
-      // Add user's data to formData
       formData.append("name", this.name);
       formData.append("email", this.email);
       formData.append("password", this.password);
@@ -128,10 +126,8 @@ export default {
         });
     },
     loginUser() {
-      // this.$v.$touch();
-      const formData = new FormData();
 
-      // Add user's data to formData
+      const formData = new FormData();
       formData.append("email", this.email);
       formData.append("password", this.password);
 
@@ -156,7 +152,7 @@ export default {
   },
 };
 </script>
-// mohsenfallahnejad@gmail.com // mohsenhastam
+
 <style lang="sass" scoped>
 @import url('https://fonts.googleapis.com/css?family=Muli:200,400&display=swap')
 $white: #ffffff
