@@ -1,5 +1,7 @@
 # todolist
 
+A todo list on your personal account
+
 ## Project setup
 ```
 yarn install
